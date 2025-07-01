@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<title>
+   Lenkzeiten-Rechner
+  </title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/pdfmake.min.js">
+   function berechnen() {
+  function parseTime(t) {
+    let [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  let start = document.getElementById("startzeit").value;
+  let ende = document.getElementById("endzeit").value;
+
+  if (!start || !ende) {
+    alert("Bitte Start- und Endzeit eingeben.");
+    return;
+  }
+
+  let startMin = parseTime(start);
+  let endMin = parseTime(ende);
+  if (endMin < startMin) endMin += 1440;
+
+  let dauer = endMin - startMin;
+
+  // Gesamte abzugsfähige Zeit aus Wendezeiten (alle >= 1 Minute)
+  let wendeInputs = document.querySelectorAll("#wendezeiten input");
+  let abzugszeit = 0;
+  let anrechenbareWenden = 0;
+
+  wendeInputs.forEach(el => {
+    let val = parseInt(el.value);
+    if (!isNaN(val) && val >= 1) {
+      abzugszeit += val;
+      if (val >= 11) anrechenbareWenden += val;
+    }
+  });
+
+  let lenkzeitEffektiv = dauer - abzugszeit;
+  if (lenkzeitEffektiv < 0) lenkzeitEffektiv = 0;
+
+  let mindestWende = Math.round(lenkzeitEffektiv / 6);
+  let fehlend = mindestWende - anrechenbareWenden;
+
+
+  if (fehlend < 0) fehlend = 0;
+
+
+  document.getElementById("output").innerHTML = 
+    "Gesamtdauer: " + dauer + " Minuten<br>" +
+    "Abzugszeit (alle Einträge ≥ 1 Minute): " + abzugszeit + " Minuten<br>" +
+    "Effektive Lenkzeit: " + lenkzeitEffektiv + " Minuten<br>" +
+    "Erforderliche Wendezeit nach 1/6-Regelung: " + mindestWende + " Minuten<br>" +
+    "Angerechnete Wendezeit (≥ 11 Minuten): " + anrechenbareWenden + " Minuten<br>" +
+    (fehlend > 0 ? "❗ Noch fehlend: " + fehlend + " Minuten" : "✔️ 1/6-Regelung erfüllt");
+}
+  </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/vfs_fonts.js">
+</script>
+<link href="manifest.json" rel="manifest"/>
+<meta content="#0d6efd" name="theme-color"/>
+<style>
+   body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f4f6f9;
+      color: #212529;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      width: 100%;
+    }
+    h2 {
+      text-align: center;
+      color: #0d6efd;
+      margin-bottom: 5px;
+    }
+    p.subtitle {
+      text-align: center;
+      font-size: 16px;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 20px;
+    }
+    .flex-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 6px;
+      max-height: none;
+      overflow-y: auto;
+    }
+    .flex-grid input {
+      width: 70px;
+      padding: 6px;
+      font-size: 14px;
+    }
+    input[type="time"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 150px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    button {
+      margin-top: 25px;
+      padding: 14px 28px;
+      background: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      width: 100%;
+    }
+    .reset-button {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      margin-top: 10px;
+    }
+    .reset-button:hover {
+      background-color: #f5c6cb;
+    }
+    .result {
+      margin-top: 25px;
+      padding: 20px;
+      background: #f1f1f1;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    @media (max-width: 600px) {
+      .flex-grid input {
+        width: 22%;
+        min-width: 60px;
+      }
+      input[type="time"] {
+        width: 100%;
+      }
+      button {
+        font-size: 16px;
+        padding: 12px 20px;
+      }
+    }
+  
+
+   body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f4f6f9;
+      color: #212529;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      width: 100%;
+    }
+    h2 {
+      text-align: center;
+      color: #0d6efd;
+      margin-bottom: 5px;
+    }
+    p.subtitle {
+      text-align: center;
+      font-size: 16px;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 20px;
+    }
+    .flex-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 6px;
+      max-height: none;
+      overflow-y: auto;
+    }
+    .flex-grid input {
+      width: 70px;
+      padding: 6px;
+      font-size: 14px;
+    }
+    input[type="time"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 150px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    button {
+      margin-top: 25px;
+      padding: 14px 28px;
+      background: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      width: 100%;
+    }
+    .reset-button {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      margin-top: 10px;
+    }
+    .reset-button:hover {
+      background-color: #f5c6cb;
+    }
+    .result {
+      margin-top: 25px;
+      padding: 20px;
+      background: #f1f1f1;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    @media (max-width: 600px) {
+      .flex-grid input {
+        width: 22%;
+        min-width: 60px;
+      }
+      input[type="time"] {
+        width: 100%;
+      }
+      button {
+        font-size: 16px;
+        padding: 12px 20px;
+      }
+    }
+  
+input[type='number'].error { border: 2px solid red !important; }
+input.error { border: 2px solid red !important; background-color: #ffe6e6; }</style>
+</head>
+<body>
+<div class="container">
+<h2>
+    Lenkzeiten-Rechner
+   </h2>
+<p class="subtitle">
+    Berechnung der 1/6 Regelung und der Lenkzeit ohne Pause von maximal 04:30 Stunden.
+    <span style="font-size: 14px; display: block; margin-top: 10px; color: #444;">
+     Die 1/6-Regelung bezieht sich auf die Lenkzeitunterbrechungen und besagt, dass die Wendezeiten 1/6 der reinen Lenkzeit betragen müssen, wenn der durchschnittliche Haltestellenabstand unter 3 km liegt. Dies bedeutet, dass die Lenkzeitunterbrechungen so bemessen sein müssen, dass sie 1/6 der vorhergehenden Lenkzeit ausmachen.
+    </span>
+</p>
+<label for="start">
+    Ausrückzeit oder Fahrzeugübernahme (ohne Aufrüst-Zeit):
+   </label>
+<input id="start" type="time" value="21:00"/>
+<label for="end">
+    Einrückzeit, Abstellen des Fahrzeuges oder Übergabe auf Strecke (ohne Abrüst-Zeit):
+   </label>
+<input id="end" type="time" value="01:00"/>
+<span id="wendedefizit" style="margin-left:10px; font-weight:600; color:#0d6efd;">
+</span>
+<label>
+    Sonstige von der Lenkzeit abzugsfähige Zeiten (z. B. Anschlusszeiten und Wartezeiten auf Strecke):
+   </label>
+<div class="flex-grid" id="standzeiten">
+<input class="stand" id="feld2" oninput="validateInputs()" placeholder="1" type="text"/>
+<input class="stand" id="feld3" oninput="validateInputs()" placeholder="2" type="text"/>
+<input class="stand" id="feld4" oninput="validateInputs()" placeholder="3" type="text"/>
+<input class="stand" id="feld5" oninput="validateInputs()" placeholder="4" type="text"/>
+<input class="stand" id="feld6" oninput="validateInputs()" placeholder="5" type="text"/>
+<input class="stand" id="feld7" oninput="validateInputs()" placeholder="6" type="text"/>
+<input class="stand" id="feld8" oninput="validateInputs()" placeholder="7" type="text"/>
+<input class="stand" id="feld9" oninput="validateInputs()" placeholder="8" type="text"/>
+<input class="stand" id="feld10" oninput="validateInputs()" placeholder="9" type="text"/>
+<input class="stand" id="feld11" oninput="validateInputs()" placeholder="10" type="text"/>
+<input class="stand" id="feld12" oninput="validateInputs()" placeholder="11" type="text"/>
+<input class="stand" id="feld13" oninput="validateInputs()" placeholder="12" type="text"/>
+<input class="stand" id="feld14" oninput="validateInputs()" placeholder="13" type="text"/>
+<input class="stand" id="feld15" oninput="validateInputs()" placeholder="14" type="text"/>
+<input class="stand" id="feld16" oninput="validateInputs()" placeholder="15" type="text"/>
+<input class="stand" id="feld17" oninput="validateInputs()" placeholder="16" type="text"/>
+<input class="stand" id="feld18" oninput="validateInputs()" placeholder="17" type="text"/>
+<input class="stand" id="feld19" oninput="validateInputs()" placeholder="18" type="text"/>
+<input class="stand" id="feld20" oninput="validateInputs()" placeholder="19" type="text"/>
+<input class="stand" id="feld21" oninput="validateInputs()" placeholder="20" type="text"/>
+</div>
+<label>
+    Wendezeiten und abzugsfähige Standzeiten an Endpunkten:
+   </label>
+<p style="margin-top:5px; font-size:14px; color:#555;">
+    Hier bitte alle realisierten Zeiten eintragen. Für die 1/6-Regelung werden nur Zeiten über 10 Minuten plus 1 technische Minute, also ab 11 Minuten, berücksichtigt.
+   </p>
+<div class="flex-grid" id="wendezeiten">
+<input class="wende" id="feld22" oninput="validateInputs()" placeholder="1" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld23" oninput="validateInputs()" placeholder="2" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld24" oninput="validateInputs()" placeholder="3" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld25" oninput="validateInputs()" placeholder="4" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld26" oninput="validateInputs()" placeholder="5" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld27" oninput="validateInputs()" placeholder="6" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld28" oninput="validateInputs()" placeholder="7" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld29" oninput="validateInputs()" placeholder="8" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld30" oninput="validateInputs()" placeholder="9" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld31" oninput="validateInputs()" placeholder="10" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld32" oninput="validateInputs()" placeholder="11" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld33" oninput="validateInputs()" placeholder="12" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld34" oninput="validateInputs()" placeholder="13" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld35" oninput="validateInputs()" placeholder="14" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld36" oninput="validateInputs()" placeholder="15" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld37" oninput="validateInputs()" placeholder="16" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld38" oninput="validateInputs()" placeholder="17" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld39" oninput="validateInputs()" placeholder="18" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld40" oninput="validateInputs()" placeholder="19" style="background-color: #fff9c4;" type="text"/>
+<input class="wende" id="feld41" oninput="validateInputs()" placeholder="20" style="background-color: #fff9c4;" type="text"/>
+</div>
+<button onclick="berechnen()">
+    Berechnen
+   </button>
+<button onclick="exportPDF()">
+    Ergebnis als PDF speichern
+   </button>
+<button class="reset-button" onclick="eingabenLoeschen()">
+    Alle Eingaben löschen
+   </button>
+<div class="result" id="output">
+</div><div id="hinweisbox" style="display:none; margin-top:10px; padding:10px; background-color:#fff3cd; border:1px solid #ffeeba; color:#856404; border-radius:4px;">❗ Ungültige Eingabe erkannt!</div><button onclick="exportDetailedPDF()" style="margin-top: 10px; background-color:#198754;">📄 Detailliertes Ergebnis als PDF speichern</button>
+<p style="text-align:center; font-size:14px; color:gray; margin-top:40px;">
+    © Jörg Ziegler
+   </p>
+<div id="hinweisblock" style="margin-top: 40px; padding: 20px; background-color: #eef3f8; border-left: 5px solid #0d6efd; font-size: 15px; line-height: 1.6;">
+<b>
+     Zusätzliche Hinweise zu den gesetzlichen Lenk- und Ruhezeiten:
+    </b>
+<br/>
+<br/>
+    Zusätzlich zu diesen Vorgaben gelten die allgemeinen Lenk- und Ruhezeitvorschriften, wie sie im Fahrpersonalgesetz (FPersG) und der EG-Verordnung (EG) Nr. 561/2006 festgelegt sind.
+    <br/>
+<br/>
+<b>
+     Dazu gehören:
+    </b>
+<br/>
+    • Tägliche Lenkzeit: Maximal 9 Stunden, zweimal pro Woche 10 Stunden.
+    <br/>
+    • Wöchentliche Lenkzeit: Maximal 56 Stunden.
+    <br/>
+    • Lenkzeit in zwei aufeinanderfolgenden Wochen: Maximal 90 Stunden.
+    <br/>
+    • Fahrtunterbrechungen: Nach spätestens 4,5 Stunden Lenkzeit ist eine Unterbrechung von mindestens 45 Minuten vorgeschrieben. Diese kann in 15 und 30 Minuten aufgeteilt werden.
+    <br/>
+    Nach einer Pause von mindestens 30 Minuten beginnt ein neuer Lenkzeitblock, der zu betrachten ist.
+    <br/>
+    Wenn die ununterbrochene Lenkzeit vor der Blockpause 4,5 Stunden nicht erreicht, beginnt nach der Blockpause ein neuer Lenkzeitblock. In diesem Fall ist eine 30-minütige Unterbrechung ausreichend.
+    <br/>
+    Die höchstzulässige Lenkzeit von 4,5 Stunden gilt als ununterbrochene Lenkzeit, wenn zwischen den Fahrten keine ausreichende Pause gemacht wird. Kurze Wendezeiten oder Standzeiten von 1–9 Minuten zählen nicht als Pause im Sinne der Lenk- und Ruhezeitenverordnung.
+    <br/>
+    Eine Pause muss mindestens 15 Minuten am Stück dauern, damit sie als Unterbrechung der Lenkzeit anerkannt wird. Mehrere Pausen sind möglich, aber jede muss mindestens 15 Minuten betragen, um angerechnet zu werden.
+    <br/>
+<b>
+     Kurz gesagt:
+    </b>
+    Wendezeiten von 1–9 Minuten unterbrechen die Lenkzeit nicht und die 4,5 Stunden laufen weiter.
+    <br/>
+    Ja, auch bei Anwendung der 1/6-Regelung gilt die maximale Lenkzeit von 4,5 Stunden. Die 1/6-Regelung erlaubt es lediglich, planmäßige Stand- oder Wendezeiten ab mindestens 10 Minuten (plus 1 technische Minute) als Pausen anzurechnen, sofern sie zusammen mindestens ein Sechstel der vorgesehenen Lenkzeit betragen.
+    <br/>
+    Die 4,5-Stunden-Grenze bleibt aber bestehen: Nach spätestens 4,5 Stunden Lenkzeit muss eine reguläre Pause eingelegt werden, es sei denn, die 1/6-Regelung wurde korrekt angewendet und die erforderlichen Pausenblöcke wurden erreicht.
+    <br/>
+<br/>
+<b>
+     Tägliche Ruhezeit:
+    </b>
+    Mindestens 11 Stunden, kann dreimal pro Woche auf 9 Stunden verkürzt werden. (BV Dienstplanparameter mindestens 11h)
+    <br/>
+<b>
+     Wöchentliche Ruhezeit:
+    </b>
+    Mindestens 45 Stunden. (Laut TVN-Thüringen ist dies auf 56h in Ausnahmen, ansonsten auf 60h geregelt.)
+   </div>
+</div>
+<script>
+   function berechnen() {
+      const toMinutes = t => {
+        let [h, m] = t.split(":").map(Number);
+        return h * 60 + m;
+      };
+
+      const sumInputs = className =>
+        Array.from(document.getElementsByClassName(className))
+          .map(input => Number(input.value) || 0)
+          .reduce((a, b) => a + b, 0);
+
+      let start = toMinutes(document.getElementById("start").value);
+      let end = toMinutes(document.getElementById("end").value);
+      let stand = sumInputs("stand");
+      let wendezeiten = Array.from(document.getElementsByClassName("wende")).map(input => Number(input.value) || 0);
+      let wende = wendezeiten.reduce((a, b) => a + b, 0);
+
+      let arbeitszeit = end - start;
+      if (arbeitszeit < 0) arbeitszeit += 1440;
+
+      let lenkzeit = arbeitszeit - stand - wende;
+      if (lenkzeit < 0) lenkzeit = 0;
+
+      let anrechenbareWenden = wendezeiten.filter(min => min >= 11).reduce((a, b) => a + b, 0);
+      let mindestpause161 = Math.ceil(lenkzeit / 6);
+
+      let hinweis = "";
+      if (lenkzeit > 270) {
+        if (anrechenbareWenden >= mindestpause161) {
+          hinweis = "<br><span style='color:green;'>✔️ 1/6-Regel erfüllt – ausreichend Wendezeiten vorhanden.</span>";
+        } else {
+          hinweis = "<br><span style='color:red;'>❌ Lenkzeit über 4:30h – nicht genügend Wendezeiten für 1/6-Regel!</span>";
+        }
+      } else {
+        hinweis = "<br><span style='color:green;'>✔️ Lenkzeit unter 4:30h – keine Pause erforderlich.</span>";
+      }
+
+      const toHHMM = function(min) {
+        let h = Math.floor(min / 60);
+        let m = min % 60;
+        return (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m) + " h";
+      };
+
+      document.getElementById("output").innerHTML =
+        "Arbeitszeit: " + toHHMM(arbeitszeit) + "<br>" +
+        "Lenkzeit: " + toHHMM(lenkzeit) + "<br>" +
+        "Stand- und Wartezeiten: " + toHHMM(stand) + "<br>" +
+        "Sonstige Abzüge: " + toHHMM(wende) + hinweis;
+      if (lenkzeit > 540) {
+        document.getElementById("output").innerHTML += "<br><span style='color:red;'>❌ Tägliche Lenkzeit überschreitet 9 Stunden – dies ist unzulässig ohne Ausnahmeregelung oder Ersatzruhezeit!</span>";
+      }
+
+    }
+
+    function exportPDF() {
+      const output = document.getElementById("output").innerHTML;
+      const text = output.replace(/<br>/g, "\n").replace(/<[^>]*>/g, "").trim();
+      var docDefinition = {
+        content: [
+          { text: 'Ergebnis – Lenkzeiten-Rechner', style: 'header' },
+          { text: new Date().toLocaleString(), style: 'subheader' },
+          { text: text, margin: [0, 20, 0, 0] }
+        ],
+        styles: {
+          header: { fontSize: 18, bold: true },
+          subheader: { fontSize: 12, color: 'gray' }
+        }
+      };
+      pdfMake.createPdf(docDefinition).download("lenkzeit_ergebnis.pdf");
+    }
+
+    function eingabenLoeschen() {
+      document.getElementById("start").value = "";
+      document.getElementById("end").value = "";
+      document.querySelectorAll("input.stand, input.wende").forEach(el => el.value = "");
+      document.getElementById("output").innerHTML = "";
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  
+      let fehlendeWende = mindestpause161 - anrechenbareWenden;
+      if (fehlendeWende > 0 && lenkzeit > 270) {
+        document.getElementById("wendedefizit").innerHTML = 
+          "➡️ Es fehlen noch " + fehlendeWende + " Minuten an anrechenbaren Wendezeiten zur Einhaltung der 1/6-Regelung.";
+      } else {
+        document.getElementById("wendedefizit").innerHTML = "";
+      }
+  </script>
+<script>
+function exportDetailedPDF() {
+  const output = document.getElementById("output").innerHTML;
+  const text = output.replace(/<br>/g, "\n").replace(/<[^>]*>/g, "").trim();
+
+  const start = document.getElementById("start").value;
+  const end = document.getElementById("end").value;
+
+  const standInputs = Array.from(document.querySelectorAll("input.stand")).map((el, i) => "Standzeit " + (i+1) + ": " + (el.value || "0") + " Min");
+  const wendeInputs = Array.from(document.querySelectorAll("input.wende")).map((el, i) => "Wendezeit " + (i+1) + ": " + (el.value || "0") + " Min");
+
+  const allInputs = [
+    "Startzeit: " + start,
+    "Endzeit: " + end,
+    "",
+    "Standzeiten:",
+    ...standInputs,
+    "",
+    "Wendezeiten:",
+    ...wendeInputs,
+    "",
+    "Berechnetes Ergebnis:",
+    text
+  ];
+
+  var docDefinition = {
+    content: [
+      { text: 'Detailliertes Ergebnis – Lenkzeiten-Rechner', style: 'header' },
+      { text: new Date().toLocaleString(), style: 'subheader' },
+      { text: allInputs.join("\n"), margin: [0, 20, 0, 0] }
+    ],
+    styles: {
+      header: { fontSize: 18, bold: true },
+      subheader: { fontSize: 12, color: 'gray' }
+    }
+  };
+  pdfMake.createPdf(docDefinition).download("lenkzeit_detailliert.pdf");
+}
+</script><script>
+document.addEventListener("DOMContentLoaded", function () {
+  for (let i = 2; i <= 41; i++) {
+    const input = document.getElementById("feld" + i);
+    if (input) {
+      input.addEventListener("input", function () {
+        const val = input.value.trim();
+        const num = Number(val);
+        if (val === "" || (/^\d+$/.test(val) && num >= 0 && num <= 999)) {
+          input.classList.remove("error");
+        } else {
+          input.classList.add("error");
+        }
+      });
+    }
+  }
+});
+</script><script>
+document.addEventListener("DOMContentLoaded", function () {
+  function validateInputs() {
+    let isValid = true;
+    const hinweisBox = document.getElementById("hinweisbox");
+    for (let i = 2; i <= 41; i++) {
+      const input = document.getElementById("feld" + i);
+      if (!input) continue;
+      const val = input.value.trim();
+      const num = Number(val);
+      if (
+        val !== "" &&
+        (!/^\d+$/.test(val) || num < 0 || num > 999)
+      ) {
+        input.classList.add("error");
+        isValid = false;
+      } else {
+        input.classList.remove("error");
+      }
+    }
+
+    if (!isValid && hinweisBox) {
+      hinweisBox.style.display = "block";
+      hinweisBox.innerText = "❗ Ungültige Eingabe erkannt!";
+    } else if (hinweisBox) {
+      hinweisBox.style.display = "none";
+      hinweisBox.innerText = "";
+    }
+
+    return isValid;
+  }
+
+  // Global verfügbar machen
+  window.validateInputs = validateInputs;
+});
+</script></body>
+</html>
