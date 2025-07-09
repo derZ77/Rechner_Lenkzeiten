@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'rechner-lenkzeiten-v9';// Update v8.01 → v9
+const CACHE_NAME = 'rechner-lenkzeiten-v10';// Update v9 → v10
   './index.html',
   './manifest.json',
   './icon.png',
