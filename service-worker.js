@@ -1,6 +1,5 @@
 
-const CACHE_NAME = 'rechner-lenkzeiten-v4';
-const FILES_TO_CACHE = [
+const CACHE_NAME = 'rechner-lenkzeiten-v5';// v5: Test für automatische Update-Meldungconst FILES_TO_CACHE = [
   './index.html',
   './manifest.json',
   './icon.png',
