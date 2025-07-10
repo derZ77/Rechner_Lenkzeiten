@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'rechner-lenkzeiten-v1';
+const CACHE_NAME = 'rechner-lenkzeiten-v2';// Update v1 -> V2
 const FILES_TO_CACHE = [
   './',
   './index.html',
