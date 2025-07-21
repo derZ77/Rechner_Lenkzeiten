@@ -1,7 +1,7 @@
 {
   "name": "Rechner Lenkzeiten",
   "short_name": "Lenkzeiten",
-  "start_url": "index.v2.html",
+  "start_url": "index.v3.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
